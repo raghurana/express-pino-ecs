@@ -5,7 +5,7 @@
   "author": "Raghu Rana",
   "license": "ISC",
   "scripts": {
-    "dev": "tsx watch --env-file=.env src/index.ts"
+    "dev": "NODE_ENV=development tsx watch --env-file=.env src/index.ts"
   },
   "devDependencies": {
     "@types/cors": "^2.8.19",
