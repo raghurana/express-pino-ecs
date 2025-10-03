@@ -1,0 +1,19 @@
+{
+    "version": "0.2.0",
+    "configurations": [     
+      {
+        "name": "Launch Express Server",
+        "type": "node",
+        "request": "launch",
+        "runtimeExecutable": "tsx",
+        "args": [
+          "watch",
+          "--env-file=.env",
+          "${workspaceFolder}/src/index.ts"
+        ],
+        "cwd": "${workspaceFolder}",
+        "skipFiles": ["<node_internals>/**", "node_modules/**"]
+      }
+    ],   
+  }
+  
