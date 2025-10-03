@@ -1,21 +1,19 @@
 import cors from "cors";
 import { env } from "./utils/env-vars";
-import express, { Request, Response, json } from "express";
-import { globalErrorHandler, global404NotFound, globalRequestLogger } from "./middleware";
 import { Logger } from "./utils/logger";
-
-Logger.init();
+import express, { Request, Response, json } from "express";
+import { globalErrorHandler, global404NotFound, globalRequestResponseLogger } from "./middleware";
 
 const app = express();
 
 // Middleware
 app.use(cors());
 app.use(json());
-app.use(globalRequestLogger);
+app.use(globalRequestResponseLogger);
 
 // Health check endpoint
 app.get("/api/health", (req: Request, res: Response) => {
-  Logger.instance.info("Health check endpoint called");
+  Logger.info("Health check endpoint called");
   res.json({
     status: "ok",
     timestamp: new Date().toISOString(),
@@ -29,6 +27,6 @@ app.use(globalErrorHandler);
 // Start server
 const PORT = env.PORT;
 app.listen(PORT, () => {
-  Logger.instance.info(`🚀 Express server running on port ${PORT}`);
-  Logger.instance.info(`📊 Health check: http://localhost:${PORT}/api/health`);
+  Logger.info(`🚀 Express server running on port ${PORT}`);
+  Logger.info(`📊 Health check: http://localhost:${PORT}/api/health`);
 });

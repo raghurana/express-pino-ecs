@@ -1,17 +1,56 @@
 import { env } from "./env-vars";
 import { Request, Response } from "express";
 import { ecsFormat } from '@elastic/ecs-pino-format'
-import pino, { Logger as PinoLogger } from "pino";
+import pino, { type Logger as PinoLogger, type LogFn, type Level as PinoLevel } from "pino";
 
 export class Logger {
     private static baseLogger: PinoLogger;
     private static currentLogger: PinoLogger;
     private static scopes = new WeakMap<Response, PinoLogger>();
+
+    static beginScope(req: Request, res: Response) {
+      const traceId = (req.headers["correlation-id"] as string) || crypto.randomUUID();
+      const spanId = (req.headers["request-id"] as string) || crypto.randomUUID();
   
-    static init() {
-      if (this.baseLogger) return;
+      res.setHeader("correlation-id", traceId);
+      res.setHeader("request-id", spanId);
   
-      const isDev = env.NODE_ENV === 'development';
+      const scopedLogger = this.baseLogger.child({ "trace.id": traceId, "span.id": spanId });
+      this.scopes.set(res, scopedLogger);
+      this.currentLogger = scopedLogger;
+    }
+
+    static info(...args: Parameters<LogFn>) {
+      this.log('info', args);
+    }
+
+    static debug(...args: Parameters<LogFn>) {
+      this.log('debug', args);
+    }
+
+    static warn(...args: Parameters<LogFn>) {
+      this.log('warn', args);
+    }
+
+    static error(...args: Parameters<LogFn>) {
+      this.log('error', args);
+    }
+  
+    static endScope(res: Response) {
+      const scoped = this.scopes.get(res);
+      if (scoped && this.currentLogger === scoped) this.currentLogger = this.baseLogger;
+      this.scopes.delete(res);
+    }
+
+    private static log(level: PinoLevel, args: Parameters<LogFn>) {      
+      this.pinoInstance[level](...args);
+    }
+
+    private static get pinoInstance(): PinoLogger {
+      return this.currentLogger ?? this.baseLogger ?? this.init();
+    }
+
+    private static init() {
       this.baseLogger = pino(
         {
           ...ecsFormat({ convertReqRes: true }),
@@ -26,7 +65,7 @@ export class Logger {
               "res.body.token"
             ],
           },
-          transport: isDev
+          transport: env.NODE_ENV === 'development'
           ? {
             target: "pino-pretty",
             options: {
@@ -40,28 +79,7 @@ export class Logger {
           : undefined
         },        
       );  
-    }
-      
-    static beginScope(req: Request, res: Response) {
-      const traceId = (req.headers["correlation-id"] as string) || crypto.randomUUID();
-      const spanId = (req.headers["request-id"] as string) || crypto.randomUUID();
-  
-      res.setHeader("correlation-id", traceId);
-      res.setHeader("request-id", spanId);
-  
-      const scopedLogger = this.baseLogger.child({ "trace.id": traceId, "span.id": spanId });
-      this.scopes.set(res, scopedLogger);
-      this.currentLogger = scopedLogger;
-    }
-      
-    static endScope(res: Response) {
-      const scoped = this.scopes.get(res);
-      if (scoped && this.currentLogger === scoped) this.currentLogger = this.baseLogger;
-      this.scopes.delete(res);
-    }
-      
-    static get instance(): PinoLogger {
-      return this.currentLogger ?? this.baseLogger;
+      return this.baseLogger;
     }
   }
 
