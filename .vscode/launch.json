@@ -6,6 +6,9 @@
         "type": "node",
         "request": "launch",
         "runtimeExecutable": "tsx",
+        "env": {
+          "NODE_ENV": "development" 
+        },
         "args": [
           "watch",
           "--env-file=.env",

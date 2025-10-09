@@ -2,23 +2,24 @@
   "name": "express-ts-pino",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
+  "author": "Raghu Rana",
   "license": "ISC",
+  "scripts": {
+    "dev": "NODE_ENV=development tsx watch --env-file=.env src/index.ts"
+  },
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
     "@types/node": "^24.6.2",
+    "pino-pretty": "^13.1.1",
     "tsx": "^4.20.6",
     "typescript": "^5.9.3"
   },
   "dependencies": {
+    "@elastic/ecs-pino-format": "^1.5.0",
     "cors": "^2.8.5",
     "express": "^5.1.0",
+    "pino": "^9.13.0",
     "zod": "^4.1.11"
   }
 }
