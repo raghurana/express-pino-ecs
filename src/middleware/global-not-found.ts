@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from 'express';
 
 export const global404NotFound = (req: Request, res: Response) => {
     res.status(404).json({
